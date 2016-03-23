@@ -1,18 +1,17 @@
 package cn.guomin0999.library;
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 /**
  * ImageView拉动放大RecyclerView
  * Created by xzh on 2016/2/18 0018.
  */
-public class ZoomImageRecyclerView extends RecyclerView {
+public class ZoomImageListView extends ListView {
 
     /**
      * 动画还原速度,越小速度越快
@@ -34,12 +33,12 @@ public class ZoomImageRecyclerView extends RecyclerView {
     private boolean isTouch;
     private boolean canDrag;
 
-    public ZoomImageRecyclerView(Context context) {
+    public ZoomImageListView(Context context) {
         super(context);
         init();
     }
 
-    public ZoomImageRecyclerView(Context context, AttributeSet attrs) {
+    public ZoomImageListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -73,9 +72,10 @@ public class ZoomImageRecyclerView extends RecyclerView {
                     mDownY = event.getRawY();
                     mDownHeight = mZoomView.getHeight();
                     isTouch = true;
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
-                    int firstPosition = layoutManager.findFirstVisibleItemPosition();
-                    canDrag = firstPosition == 0 && layoutManager.findViewByPosition(firstPosition).getTop() == 0;
+                    canDrag = getChildCount() == 0;
+                    int firstPosition = getFirstVisiblePosition();
+
+                    canDrag = firstPosition == 0 && mZoomView.getTop() == 0;
                     if (mLayoutParams == null) {
                         mHeight = mZoomView.getHeight();
                         mLayoutParams = mZoomView.getLayoutParams();
@@ -97,7 +97,7 @@ public class ZoomImageRecyclerView extends RecyclerView {
                         return true;
                     } else if (newHeight < mHeight) { //弹超了
                         setZoomHeight(mHeight);
-                        getLayoutManager().scrollToPosition(0);
+                        scrollTo(0, 0);
                         return true;
                     }
                 }

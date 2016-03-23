@@ -8,4 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <cn.guomin0999.library.ZoomImageListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
+import com.guomin.adapter.BeanAdapter;
 import com.guomin.adapter.RecyclerAdapter;
 import com.guomin.adapter.ViewHolder;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -17,6 +18,7 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import cn.guomin0999.library.FastBlurView;
+import cn.guomin0999.library.ZoomImageListView;
 import cn.guomin0999.library.ZoomImageRecyclerView;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     ZoomImageRecyclerView recyclerView;
+    ZoomImageListView listView;
 
     public static void initImageLoader(Context context) {
 
@@ -70,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
         initImageLoader(getApplicationContext());
         recyclerView = (ZoomImageRecyclerView) findViewById(R.id.recycler);
+        listView = (ZoomImageListView) findViewById(R.id.list);
+
         adapter = new RecyclerAdapter<ItemBean>(this, android.R.layout.simple_list_item_1, R.layout.head) {
 
             public int getItemViewType(int position) {
@@ -89,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                                     blurView.setTag(bean.iconUrl);
                                     blurView.setBitmap(loadedImage);
-                                    recyclerView.setOnPullinglistener(new ZoomImageRecyclerView.OnPullinglistener() {
+                                    recyclerView.setOnPullingListener(new ZoomImageRecyclerView.OnPullingListener() {
                                         public void onPulling(float value) {
                                             blurView.setBlur(value);
                                         }
@@ -104,6 +109,45 @@ public class MainActivity extends AppCompatActivity {
         };
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+        recyclerView.setVisibility(View.GONE);
+
+        BeanAdapter<ItemBean> listAdapter = new BeanAdapter<ItemBean>(this, android.R.layout.simple_list_item_1, R.layout.head) {
+            public int getItemViewType(int position) {
+                return list.get(position).type;
+            }
+
+            public void getView(int i, ViewHolder holder, final ItemBean bean) {
+                switch (bean.type) {
+                    case 0:
+                        holder.text(android.R.id.text1, bean.name);
+                        break;
+                    case 1:
+                        listView.setZoomView(holder.itemView());
+                        final FastBlurView blurView = holder.get(R.id.blurView);
+                        if (blurView.getTag() == null || !blurView.getTag().equals(bean.iconUrl)) {
+                            ImageLoader.getInstance().loadImage(bean.iconUrl, new SimpleImageLoadingListener() {
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    blurView.setTag(bean.iconUrl);
+                                    blurView.setBitmap(loadedImage);
+                                    listView.setOnPullingListener(new ZoomImageListView.OnPullingListener() {
+                                        public void onPulling(float value) {
+                                            blurView.setBlur(value);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        holder.text(R.id.text, bean.name);
+                        break;
+                }
+            }
+        };
+        listAdapter.list.add(new ItemBean(1, "Head", "https://img3.doubanio.com/view/photo/photo/public/p2323065951.jpg"));
+        for (int i = 0; i < 990; i++) {
+            listAdapter.list.add(new ItemBean("Item" + i));
+        }
+        listAdapter.notifyDataSetChanged();
+        listView.setAdapter(listAdapter);
     }
 
     protected void onResume() {
