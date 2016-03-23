@@ -6,7 +6,9 @@
 
 ##使用方法
 0.引用
+
 maven { url "https://jitpack.io" }
+
 compile 'com.github.guomin0999:PullBlurView:0.1'
 
 1.使用ZoomImageRecyclerView替换RecyclerView
